@@ -29,14 +29,30 @@ const update = async function (table, pk, values) {
   return query(`UPDATE ${table} SET ${Object.keys(values).map((name) => `${name}=?`).join(',')} WHERE id=?`, [...Object.values(values), pk]);
 }
 
-const select = async function (table, condition, attributes = ['*']) {
+const select = async function (table, condition, attributes = ['*'], join = []) {
+
+  attributes = attributes.map(item => `${table}.${item} as ${item}`);
+
+  if(join.length > 0) {
+    join.forEach((item) => {
+      attributes = [...attributes, `${item[0]}.${item[2]}`]
+    });
+  }
 
   let q = `SELECT ${attributes.join(',')} FROM ${table}`;
   let v = []
 
+  if(join.length > 0) {
+
+    join.forEach((item) => {
+      q = `${q} JOIN ${item[0]} ON ${item[1]} = ${item[0]}.id`;
+    });
+    
+  }
+
   if (condition.where) {
     q = `${q} WHERE ${Object.keys(condition.where).length > 0 ?
-      Object.keys(condition.where).map((name) => condition.where[name].match(/[<>=]/i) ? `${name}?` : `${name}=?`).join(' AND ') : '1'}`;
+      Object.keys(condition.where).map((name) => condition.where[name].match(/[<>=]/i) ? `${table}.${name}?` : `${table}.${name}=?`).join(' AND ') : '1'}`;
     v = Object.values(condition.where).map((value) => value.replace(/[<>=]/i, ""));
   }
 

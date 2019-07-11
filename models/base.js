@@ -37,7 +37,7 @@ class Base {
     return {id: pk}
   }
 
-  async list(condition = {}) {
+  async list(condition = {}, attributes, join = []) {
 
     if (!condition.limit) {
       condition.limit = DEFAULT_LIMIT;
@@ -66,7 +66,7 @@ class Base {
       })
     }
 
-    return select(this.table, condition);
+    return select(this.table, condition, attributes || this.attributes, join);
   }
 
   async get(id) {

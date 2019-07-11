@@ -33,8 +33,14 @@ class Books extends Base {
     }
 
     return super.create(values);
-
   }
+
+  async list(condition) {
+    return super.list(condition, this.attributes, [
+      [authors.table, 'authorId', ['title as author']]
+    ]);
+  }
+
 }
 
 module.exports = new Books;
